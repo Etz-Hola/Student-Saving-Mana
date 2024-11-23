@@ -1,13 +1,108 @@
+/* General App Styles */
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+  }
+  
+  .app-container {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  /* Registration Styles */
+  .registration-container {
+    background-color: #ffffff;
+    padding: 20px;
+    margin: 20px auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .registration-container input,
+  .registration-container select,
+  .registration-container button {
+    margin: 10px 0;
+    padding: 10px;
+    width: calc(100% - 22px);
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .registration-container button {
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .registration-container button:hover {
+    background-color: #218838;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 14px;
+  }
+  
+  /* Dashboard Styles */
+  .dashboard-container {
+    background-color: #ffffff;
+    padding: 20px;
+    margin: 20px auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .dashboard-container th,
+  .dashboard-container td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .dashboard-container th {
+    background-color: #f4f4f4;
+  }
+  
+  .simulate-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin: 10px 0;
+    border-radius: 4px;
+  }
+  
+  .simulate-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .dashboard-container button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .dashboard-container button:hover {
+    background-color: #c82333;
+  }
+  
