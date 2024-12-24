@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./index.css";
+
 
 const Hub = () => {
   const [students, setStudents] = useState([]);
@@ -9,6 +10,26 @@ const Hub = () => {
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [profitStats, setProfitStats] = useState({
+    dailyProfit: 0,
+    weeklyProfit: 0,
+    monthlyProfit: 0,
+    yearlyProfit: 0
+  });
+
+  useEffect(() => {
+    calculateProfits();
+  }, [students]);
+
+  const calculateProfits = () => {
+    const totalInterest = students.reduce((sum, student) => sum + student.weeklyInterest, 0);
+    setProfitStats({
+      dailyProfit: totalInterest / 7,
+      weeklyProfit: totalInterest,
+      monthlyProfit: totalInterest * 4,
+      yearlyProfit: totalInterest * 52
+    });
+  };
 
   const handleRegister = () => {
     if (!name || !tier || !amount) {
@@ -39,14 +60,20 @@ const Hub = () => {
       { 
         name, 
         tier, 
-        amount, 
-        weeklyInterest, 
+        amount: parseInt(amount),
+        weeklyInterest,
         totalWithdrawal,
         joinDate,
-        weeksActive: 0
+        weeksActive: 0,
+        totalProfit: 0,
+        profitHistory: []
       }
     ]);
 
+    resetForm();
+  };
+
+  const resetForm = () => {
     setName("");
     setTier("");
     setAmount("");
@@ -58,176 +85,263 @@ const Hub = () => {
     setShowModal(true);
   };
 
-  const confirmWithdraw = () => {
-    const index = students.findIndex(s => s.name === selectedStudent.name);
-    setStudents(prevStudents => prevStudents.filter((_, i) => i !== index));
-    setShowModal(false);
-    setSelectedStudent(null);
-  };
-
   const simulateWeek = () => {
     setStudents(prevStudents =>
       prevStudents.map(student => {
         const interestRate = parseFloat(student.tier.split(" ")[1]) / 100;
         const newWeeklyInterest = student.amount * interestRate;
-        const newTotalWithdrawal = parseInt(student.totalWithdrawal) + newWeeklyInterest;
+        const newTotalProfit = student.totalProfit + newWeeklyInterest;
+        
         return {
           ...student,
           weeklyInterest: newWeeklyInterest,
-          totalWithdrawal: newTotalWithdrawal,
-          weeksActive: student.weeksActive + 1
+          totalWithdrawal: student.amount + newTotalProfit,
+          weeksActive: student.weeksActive + 1,
+          totalProfit: newTotalProfit,
+          profitHistory: [...student.profitHistory, newWeeklyInterest]
         };
       })
     );
   };
 
-  const totalSavings = students.reduce((sum, student) => sum + parseInt(student.amount), 0);
-  const totalInterest = students.reduce((sum, student) => sum + student.weeklyInterest, 0);
-  const averageReturn = students.length > 0 ? (totalInterest / totalSavings * 100).toFixed(2) : 0;
+  const totalSavings = students.reduce((sum, student) => sum + student.amount, 0);
+  const totalMembers = students.length;
+  const averageReturn = students.length > 0 
+    ? (profitStats.weeklyProfit / totalSavings * 100).toFixed(2) 
+    : 0;
 
   return (
     <div className="app-container">
+      {/* Navigation */}
+      <nav className="nav-bar">
+        <div className="nav-logo">SavingsHub</div>
+        <div className="nav-links">
+          <span className="nav-item">Dashboard</span>
+          <span className="nav-item">Reports</span>
+          <span className="nav-item">Settings</span>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
       <div className="hero-section">
-        <h1>Savings Group Hub</h1>
-        <p>Secure your future with group savings</p>
+        <h1>Student Savings & Investment Hub</h1>
+        <p>Building wealth through collective saving and compound interest</p>
       </div>
 
+      {/* Main Content */}
       <div className="content-wrapper">
-        {/* Registration Form */}
-        <div className="registration-container">
-          <h2>Register a Student</h2>
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <select value={tier} onChange={(e) => setTier(e.target.value)}>
-              <option value="">Select Tier</option>
-              <option value="Tier 1">Tier 1 - 10,000 Naira</option>
-              <option value="Tier 2">Tier 2 - 20,000 Naira</option>
-              <option value="Tier 3">Tier 3 - 30,000 Naira</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-            {error && <p className="error-message">{error}</p>}
-            <button className="register-btn" onClick={handleRegister}>Register</button>
+        <div className="grid-container">
+          {/* Registration Form */}
+          <div className="registration-card">
+            <div className="card-header">
+              <h2>New Member Registration</h2>
+              <p>Join our savings community today</p>
+            </div>
+            <div className="form-group">
+              <div className="input-group">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div className="input-group">
+                <label>Savings Tier</label>
+                <select value={tier} onChange={(e) => setTier(e.target.value)}>
+                  <option value="">Select your tier</option>
+                  <option value="Tier 1">Tier 1 - ₦10,000</option>
+                  <option value="Tier 2">Tier 2 - ₦20,000</option>
+                  <option value="Tier 3">Tier 3 - ₦30,000</option>
+                </select>
+              </div>
+              <div className="input-group">
+                <label>Initial Deposit</label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Enter amount"
+                />
+              </div>
+              {error && <div className="error-message">{error}</div>}
+              <button className="primary-button" onClick={handleRegister}>
+                Register Member
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Summary Cards */}
-        <div className="summary-section">
-          <div className="summary-card">
-            <div className="card-icon savings-icon">💰</div>
-            <h3>Total Savings</h3>
-            <p className="amount">{totalSavings.toLocaleString()} Naira</p>
+          {/* Stats Grid */}
+          <div className="stats-grid">
+            <div className="stat-card primary">
+              <div className="stat-icon">💰</div>
+              <div className="stat-content">
+                <h3>Total Savings</h3>
+                <p className="stat-value">₦{totalSavings.toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="stat-card secondary">
+              <div className="stat-icon">👥</div>
+              <div className="stat-content">
+                <h3>Active Members</h3>
+                <p className="stat-value">{totalMembers}/12</p>
+              </div>
+            </div>
+            <div className="stat-card success">
+              <div className="stat-icon">📈</div>
+              <div className="stat-content">
+                <h3>Average Return</h3>
+                <p className="stat-value">{averageReturn}%</p>
+              </div>
+            </div>
+            <div className="stat-card info">
+              <div className="stat-icon">⭐</div>
+              <div className="stat-content">
+                <h3>Top Tier</h3>
+                <p className="stat-value">Tier {students.length > 0 ? '3' : '-'}</p>
+              </div>
+            </div>
           </div>
-          <div className="summary-card">
-            <div className="card-icon members-icon">👥</div>
-            <h3>Members</h3>
-            <p className="amount">{students.length}/12</p>
-          </div>
-          <div className="summary-card">
-            <div className="card-icon interest-icon">📈</div>
-            <h3>Weekly Interest</h3>
-            <p className="amount">{totalInterest.toLocaleString()} Naira</p>
-          </div>
-          <div className="summary-card">
-            <div className="card-icon return-icon">🎯</div>
-            <h3>Average Return</h3>
-            <p className="amount">{averageReturn}%</p>
-          </div>
-        </div>
 
-        <button className="simulate-btn" onClick={simulateWeek}>
-          Simulate Weekly Progress
-        </button>
+          {/* Profit Tracking */}
+          <div className="profit-section">
+            <h2>Profit Analytics</h2>
+            <div className="profit-grid">
+              <div className="profit-card">
+                <h3>Daily Profit</h3>
+                <p>₦{profitStats.dailyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+              </div>
+              <div className="profit-card">
+                <h3>Weekly Profit</h3>
+                <p>₦{profitStats.weeklyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+              </div>
+              <div className="profit-card">
+                <h3>Monthly Profit</h3>
+                <p>₦{profitStats.monthlyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+              </div>
+              <div className="profit-card">
+                <h3>Yearly Projection</h3>
+                <p>₦{profitStats.yearlyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+              </div>
+            </div>
+            <button className="simulate-button" onClick={simulateWeek}>
+              Simulate Weekly Progress
+            </button>
+          </div>
 
-        {/* Dashboard Table */}
-        <div className="dashboard-container">
-          <h2>Members Dashboard</h2>
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Tier</th>
-                  <th>Savings</th>
-                  <th>Weekly Interest</th>
-                  <th>Total Value</th>
-                  <th>Weeks Active</th>
-                  <th>Join Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student, index) => (
-                  <tr key={index}>
-                    <td>{student.name}</td>
-                    <td>{student.tier}</td>
-                    <td>{parseInt(student.amount).toLocaleString()}</td>
-                    <td>{student.weeklyInterest.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td>{student.totalWithdrawal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                    <td>{student.weeksActive}</td>
-                    <td>{student.joinDate}</td>
-                    <td>
-                      <button className="withdraw-btn" onClick={() => handleWithdraw(index)}>
-                        Withdraw
-                      </button>
-                    </td>
+          {/* Members Table */}
+          <div className="members-section">
+            <h2>Members Overview</h2>
+            <div className="table-responsive">
+              <table className="members-table">
+                <thead>
+                  <tr>
+                    <th>Member</th>
+                    <th>Tier</th>
+                    <th>Principal</th>
+                    <th>Weekly Returns</th>
+                    <th>Total Value</th>
+                    <th>Weeks Active</th>
+                    <th>Total Profit</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {students.map((student, index) => (
+                    <tr key={index}>
+                      <td>
+                        <div className="member-info">
+                          <span className="member-name">{student.name}</span>
+                          <span className="member-date">Joined: {student.joinDate}</span>
+                        </div>
+                      </td>
+                      <td>{student.tier}</td>
+                      <td>₦{student.amount.toLocaleString()}</td>
+                      <td>₦{student.weeklyInterest.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                      <td>₦{student.totalWithdrawal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                      <td>{student.weeksActive}</td>
+                      <td>₦{student.totalProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                      <td>
+                        <button 
+                          className="withdraw-button"
+                          onClick={() => handleWithdraw(index)}
+                        >
+                          Withdraw
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-section">
+            <h3>About SavingsHub</h3>
+            <p>Empowering students to save and grow their wealth together.</p>
+          </div>
+          <div className="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+              <li><a href="#faq">FAQ</a></li>
+              <li><a href="#terms">Terms of Service</a></li>
+              <li><a href="#privacy">Privacy Policy</a></li>
+            </ul>
+          </div>
+          <div className="footer-section">
+            <h3>Contact Us</h3>
+            <p>Email: support@savingshub.com</p>
+            <p>Phone: +234 123 456 7890</p>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; 2024 SavingsHub. All rights reserved.</p>
+        </div>
+      </footer>
 
       {/* Withdrawal Modal */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h2>Confirm Withdrawal</h2>
-            <p>Are you sure you want to withdraw {selectedStudent.name}?</p>
-            <p>Total Amount: {selectedStudent.totalWithdrawal.toLocaleString()} Naira</p>
+            <div className="withdrawal-summary">
+              <div className="summary-item">
+                <span>Member:</span>
+                <span>{selectedStudent.name}</span>
+              </div>
+              <div className="summary-item">
+                <span>Principal Amount:</span>
+                <span>₦{selectedStudent.amount.toLocaleString()}</span>
+              </div>
+              <div className="summary-item">
+                <span>Total Profit:</span>
+                <span>₦{selectedStudent.totalProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="summary-item total">
+                <span>Total Withdrawal:</span>
+                <span>₦{selectedStudent.totalWithdrawal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              </div>
+            </div>
             <div className="modal-actions">
-              <button className="confirm-btn" onClick={confirmWithdraw}>Confirm</button>
-              <button className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="confirm-button" onClick={() => {
+                setStudents(prev => prev.filter(s => s.name !== selectedStudent.name));
+                setShowModal(false);
+              }}>
+                Confirm Withdrawal
+              </button>
+              <button className="cancel-button" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>About Us</h3>
-            <p>We help students save and grow their money together.</p>
-          </div>
-          <div className="footer-section">
-            <h3>Contact</h3>
-            <p>Email: support@savingshub.com</p>
-            <p>Phone: +234 123 456 7890</p>
-          </div>
-          <div className="footer-section">
-            <h3>Quick Links</h3>
-            <ul>
-              <li><a href="#terms">Terms & Conditions</a></li>
-              <li><a href="#privacy">Privacy Policy</a></li>
-              <li><a href="#faq">FAQ</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2024 Savings Hub. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 };
