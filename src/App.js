@@ -296,8 +296,8 @@ const Hub = () => {
           </div>
           <div className="footer-section">
             <h3>Contact Us</h3>
-            <p>Email: support@savingshub.com</p>
-            <p>Phone: +234 123 456 7890</p>
+            <p>Email: qadiradesoye@gmail.com.com</p>
+            <p>Phone: +234 8130605384</p>
           </div>
         </div>
         <div className="footer-bottom">
