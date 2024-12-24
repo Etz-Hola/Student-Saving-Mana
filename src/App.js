@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
 
-
 const Hub = () => {
   const [students, setStudents] = useState([]);
   const [name, setName] = useState("");
@@ -14,7 +13,7 @@ const Hub = () => {
     dailyProfit: 0,
     weeklyProfit: 0,
     monthlyProfit: 0,
-    yearlyProfit: 0
+    yearlyProfit: 0,
   });
 
   useEffect(() => {
@@ -22,12 +21,15 @@ const Hub = () => {
   }, [students]);
 
   const calculateProfits = () => {
-    const totalInterest = students.reduce((sum, student) => sum + student.weeklyInterest, 0);
+    const totalInterest = students.reduce(
+      (sum, student) => sum + student.weeklyInterest,
+      0
+    );
     setProfitStats({
       dailyProfit: totalInterest / 7,
       weeklyProfit: totalInterest,
       monthlyProfit: totalInterest * 4,
-      yearlyProfit: totalInterest * 52
+      yearlyProfit: totalInterest * 52,
     });
   };
 
@@ -57,17 +59,17 @@ const Hub = () => {
 
     setStudents([
       ...students,
-      { 
-        name, 
-        tier, 
+      {
+        name,
+        tier,
         amount: parseInt(amount),
         weeklyInterest,
         totalWithdrawal,
         joinDate,
         weeksActive: 0,
         totalProfit: 0,
-        profitHistory: []
-      }
+        profitHistory: [],
+      },
     ]);
 
     resetForm();
@@ -86,29 +88,33 @@ const Hub = () => {
   };
 
   const simulateWeek = () => {
-    setStudents(prevStudents =>
-      prevStudents.map(student => {
+    setStudents((prevStudents) =>
+      prevStudents.map((student) => {
         const interestRate = parseFloat(student.tier.split(" ")[1]) / 100;
         const newWeeklyInterest = student.amount * interestRate;
         const newTotalProfit = student.totalProfit + newWeeklyInterest;
-        
+
         return {
           ...student,
           weeklyInterest: newWeeklyInterest,
           totalWithdrawal: student.amount + newTotalProfit,
           weeksActive: student.weeksActive + 1,
           totalProfit: newTotalProfit,
-          profitHistory: [...student.profitHistory, newWeeklyInterest]
+          profitHistory: [...student.profitHistory, newWeeklyInterest],
         };
       })
     );
   };
 
-  const totalSavings = students.reduce((sum, student) => sum + student.amount, 0);
+  const totalSavings = students.reduce(
+    (sum, student) => sum + student.amount,
+    0
+  );
   const totalMembers = students.length;
-  const averageReturn = students.length > 0 
-    ? (profitStats.weeklyProfit / totalSavings * 100).toFixed(2) 
-    : 0;
+  const averageReturn =
+    students.length > 0
+      ? ((profitStats.weeklyProfit / totalSavings) * 100).toFixed(2)
+      : 0;
 
   return (
     <div className="app-container">
@@ -199,7 +205,9 @@ const Hub = () => {
               <div className="stat-icon">⭐</div>
               <div className="stat-content">
                 <h3>Top Tier</h3>
-                <p className="stat-value">Tier {students.length > 0 ? '3' : '-'}</p>
+                <p className="stat-value">
+                  Tier {students.length > 0 ? "3" : "-"}
+                </p>
               </div>
             </div>
           </div>
@@ -210,24 +218,44 @@ const Hub = () => {
             <div className="profit-grid">
               <div className="profit-card">
                 <h3>Daily Profit</h3>
-                <p>₦{profitStats.dailyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                <p>
+                  ₦
+                  {profitStats.dailyProfit.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
               </div>
               <div className="profit-card">
                 <h3>Weekly Profit</h3>
-                <p>₦{profitStats.weeklyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                <p>
+                  ₦
+                  {profitStats.weeklyProfit.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
               </div>
               <div className="profit-card">
                 <h3>Monthly Profit</h3>
-                <p>₦{profitStats.monthlyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                <p>
+                  ₦
+                  {profitStats.monthlyProfit.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
               </div>
               <div className="profit-card">
                 <h3>Yearly Projection</h3>
-                <p>₦{profitStats.yearlyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                <p>
+                  ₦
+                  {profitStats.yearlyProfit.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
               </div>
             </div>
-            <button className="simulate-button" onClick={simulateWeek}>
-              Simulate Weekly Progress
-            </button>
+            <div class="simulate-button-container">
+              <button class="simulate-button"> Simulate Weekly Progress</button>
+            </div>
           </div>
 
           {/* Members Table */}
@@ -253,17 +281,34 @@ const Hub = () => {
                       <td>
                         <div className="member-info">
                           <span className="member-name">{student.name}</span>
-                          <span className="member-date">Joined: {student.joinDate}</span>
+                          <span className="member-date">
+                            Joined: {student.joinDate}
+                          </span>
                         </div>
                       </td>
                       <td>{student.tier}</td>
                       <td>₦{student.amount.toLocaleString()}</td>
-                      <td>₦{student.weeklyInterest.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                      <td>₦{student.totalWithdrawal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                      <td>{student.weeksActive}</td>
-                      <td>₦{student.totalProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                       <td>
-                        <button 
+                        ₦
+                        {student.weeklyInterest.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td>
+                        ₦
+                        {student.totalWithdrawal.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td>{student.weeksActive}</td>
+                      <td>
+                        ₦
+                        {student.totalProfit.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td>
+                        <button
                           className="withdraw-button"
                           onClick={() => handleWithdraw(index)}
                         >
@@ -289,9 +334,15 @@ const Hub = () => {
           <div className="footer-section">
             <h3>Quick Links</h3>
             <ul>
-              <li><a href="#faq">FAQ</a></li>
-              <li><a href="#terms">Terms of Service</a></li>
-              <li><a href="#privacy">Privacy Policy</a></li>
+              <li>
+                <a href="#faq">FAQ</a>
+              </li>
+              <li>
+                <a href="#terms">Terms of Service</a>
+              </li>
+              <li>
+                <a href="#privacy">Privacy Policy</a>
+              </li>
             </ul>
           </div>
           <div className="footer-section">
@@ -321,21 +372,39 @@ const Hub = () => {
               </div>
               <div className="summary-item">
                 <span>Total Profit:</span>
-                <span>₦{selectedStudent.totalProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                <span>
+                  ₦
+                  {selectedStudent.totalProfit.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
               </div>
               <div className="summary-item total">
                 <span>Total Withdrawal:</span>
-                <span>₦{selectedStudent.totalWithdrawal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                <span>
+                  ₦
+                  {selectedStudent.totalWithdrawal.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
               </div>
             </div>
             <div className="modal-actions">
-              <button className="confirm-button" onClick={() => {
-                setStudents(prev => prev.filter(s => s.name !== selectedStudent.name));
-                setShowModal(false);
-              }}>
+              <button
+                className="confirm-button"
+                onClick={() => {
+                  setStudents((prev) =>
+                    prev.filter((s) => s.name !== selectedStudent.name)
+                  );
+                  setShowModal(false);
+                }}
+              >
                 Confirm Withdrawal
               </button>
-              <button className="cancel-button" onClick={() => setShowModal(false)}>
+              <button
+                className="cancel-button"
+                onClick={() => setShowModal(false)}
+              >
                 Cancel
               </button>
             </div>
