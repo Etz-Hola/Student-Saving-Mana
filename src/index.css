@@ -534,6 +534,7 @@ input:focus, select:focus {
 
   .modal-actions {
     flex-direction: column;
+
   }
 }
 
